@@ -209,3 +209,97 @@ show global variables like 'socket';
 * 应用程序需要使用API接口连接MySQL
 * 开发工程师可以使用图形工具连接MySQL
 * 命令行客户端才是DBA的最爱
+
+
+## 1.4-SQL语言入门
+
+### 关系型数据库
+
+* 数据存放在表中
+* 表的每一行被称为记录
+* 表中所有记录都有相同的字段（列）
+
+### SQL是什么
+
+* Structured Query Language
+* 是一种特殊目的的编程语言，用于关系型数据库中的标准数据存取操作
+* 与数据库进行沟通的钥匙
+
+### SQL语言与数据库
+
+* 用SQL创建表，定义表中的字段
+* 用SQL向表中增加，删除，修改记录
+* 用SQL从表中查询到想要的记录
+* 用SQL操作数据库的一切
+
+### SQL语句的分类
+
+|SQL语句的分类|大致用途|
+|----|----|
+|DDL(Data Definition Language)|创建表，删除表，修改表……|
+|DML(Data Manipulation Language)|向表中插入记录，修改或者删除表中的记录……|
+|select|根据条件从表中查询出想要得到的记录|
+|DCL(Data Control Language)|控制数据库的访问权限等设置|
+|TCL(Transaction Control Language)|控制事务进展|
+
+* DDL
+  * CREATE TABLE
+  * DROP TABLE
+  * ALTER TABLE
+* DML
+  * SELECT FROM TABLE
+  * INSERT INTO TABLE
+  * UPDATE TABLE SET
+  * DELETE FROM TABLE
+* DCL
+  * GRANT
+  * REVOKE
+* TCL
+  * COMMIT
+  * ROLLBACK
+
+
+example:
+```sql
+# 查看当前有哪些数据库
+show databases;
+# 使用名为test的数据库
+use test;
+# 创建一张学生表
+create table stu(
+  id int(10),
+  name varchar(20),
+  age int(10),
+  primary key(id));
+# 每一张表都需要包含一个主键，主键唯一标识一条记录，唯一的字段，不可重复不能为空，通过`primary key`关键字来定义。
+
+# 查看创建好的表
+show create table stu;
+# 新加一个字段
+alter table stu add column gender varchar(20);
+# 修改一个字段
+alter table stu modify column gender varchar(40);
+# 删除一个字段
+alter table stu drop column gender;
+# 删除表
+drop table stu;
+# 查看当前数据库中的表
+show tables;
+
+# 向表中插入数据
+insert into stu(id,name,age) values(1,'pw',28);
+# 插入全部字段时可以只写表名
+insert into stu values(2,'nss',29);
+# 查看刚才添加的数据,"*"代表查询全部字段
+select * from stu;
+# 如果只想查询两个字段，则只写要查询的字段名
+select name, age from stu;
+# 也可以根据某个条件进行查询，比如只查询id为1的记录
+select name age from stu where id=1;
+
+# 更新语句
+update stu set age=29 where id=1;
+
+# 删除表中的数据
+delete from stu where id=1;
+```
