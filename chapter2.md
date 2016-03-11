@@ -193,3 +193,175 @@ select * from test;
 ### BIGINT如何存储时间类型
 
 * 应用程序将时间转换为数字类型
+
+
+## 2.2-MySQL数据对象
+
+### MySQL常见的数据对象有哪些
+
+* DataBase/Schema
+* Table
+* Index
+* View/Trigger/Function/Procedure
+
+### 库、表、行层级关系
+
+* 一个DataBase对应一个Schema
+* 一个Schema包含一个或多个表
+* 一个表里面包含一个或多个字段
+* 一个表里包含一条或多条记录
+* 一个表包含一个或多个索引
+
+### 多DataBase用途
+
+* 业务隔离
+* 资源隔离
+
+### 表上有哪些常用的数据对象
+
+* 索引
+* 约束
+* 视图、触发器、函数、存储过程
+
+### 什么是数据库索引
+
+* 读书的时候如何快速定位某一章节
+  * 查找书籍目录
+  * 在自己喜欢的章节加书签，直接定位
+* 索引就是数据库中的数据的目录（索引和数据是分开存储的）
+  * 索引和数据是两个对象
+  * 索引主要是用来提高数据库的查询效率
+  * 数据库中数据变更同样需要同步索引数据的变更
+
+## 如何创建索引（一）
+
+```sql
+CREATE [UNIQUE|FULLTEXT|SPATIAL] INDEX index_name
+  [index_type]
+  ON tbl_name (index_col_name,...)
+  [index_option]
+  [algorithm_option | lock_option] ...
+
+index_col_name:
+  col_name [(length)] [ASC | DESC]
+
+index_type:
+  USING {BTREE | HASH}
+```
+
+## 如何创建索引（二）
+
+```sql
+ALTER [IGNORE] TABLE tbl_name
+  [alter_specification [, alter_specification] ...]
+  [partition_options]
+
+alter_specification:
+    table_options
+  | ADD [COLUMN] col_name column_definition
+        [FIRST | AFTER col_name]
+    ADD [COLUMN] (col_name column_definition,...)
+    ADD {INDEX|KEY} [index_name]
+        [index_type] (index_col_name,...) [index_option] ...
+  | ADD [CONSTRAINT [symbol]] PRIMARY KEY
+        [index_type] (index_col_name,...) [index_option] ...
+  | ADD [CONSTRAINT [symbol]]
+        UNIQUE [INDEX|KEY] [index_name]
+```
+
+### 约束
+
+* 生活中的约束有哪些
+  * 每个人的指纹信息必须唯一
+  * 每个人的身份证要求唯一
+  * 网上购物需要先登录才能下单
+* 唯一约束
+  * 对一张表的某个字段或者某几个字段设置唯一键约束，保证在这个表里对应的数据必须唯一，如：用户ID、手机号、身份证等。
+
+### 创建唯一约束
+
+* 唯一约束是一种特殊的索引
+* 唯一约束可以是一个或者多个字段
+* 唯一约束可以在创建表的时候建好，也可以后面再补上
+* 主键也是一种唯一约束
+
+### 唯一约束
+
+以如下这张表为例
+
+```sql
+CREATE TABLE `order` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `orderid` int(10) unsigned NOT NULL,
+  `bookid` int(10) unsigned NOT NULL DEFAULT '0',
+  `userid` int(10) unsigned NOT NULL DEFAULT '0',
+  `number` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `address` varchar(128) NOT NULL DEFAULT '',
+  `postcode` varchar(128) NOT NULL DEFAULT '',
+  `orderdate` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `status` tinyint(3) unsigned zerofill DEFAULT '000',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `idx_orderid` (`orderid`),
+  UNIQUE KEY `idx_uid_orderid` (`userid`, `orderid`),
+  KEY `bookid` (`bookid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8
+```
+
+* 索引有哪些
+  * 主键索引 ID
+  * 单键索引 orderid
+  * 单键索引 bookid
+  * 组合索引 (userid + orderid)
+* 唯一约束有哪些
+  * 主键约束      (ID)
+  * 单键唯一索引   (orderid)
+  * 组合唯一索引   (userid + orderid)
+
+### 添加唯一约束
+
+* 添加主键
+  * alter table \`order\` add primary key (id);
+* 添加唯一索引
+  * alter table \`order\` add unique key idx_uk_orderid (orderid);
+
+### 外键约束
+  * 外键指两张表的数据通过某种条件关联起来
+
+### 创建外键约束
+
+* 将用户表和订单表通过外键关联起来
+  * alter table \`order\` add CONSTRAINT constraint_uid FOREIGN KEY (userid) REFERENCES user(userid);
+* 使用外键的注意事项
+  * 必须是INNODB表，Myisam和其他引擎不支持外键
+  * 相互约束的字段类型必须要求一样
+  * 主表的约束字段要求有索引
+  * 约束名称必须要唯一，即使不在一张表上
+
+### View
+
+* 产品需求
+  * 假如有其他部门的同事想查询我们数据库里的数据，但是我们并不想暴露表结构，并且只提供给他们部分数据
+
+### View的作用
+
+* 视图将一组查询语句构成的结果集，是一种虚拟结构，并不是实际数据
+* 视图能简化数据库的访问，能够将多个查询语句结构化为一个虚拟结构
+* 视图可以隐藏数据库后端表结构，提高数据库安全性
+* 视图也是一种权限管理，只对用户提供部分数据
+
+### 创建View
+
+* 创建已完成订单的视图
+  * create view order_view as select * from \`order\` where status=1;
+
+### Trigger
+
+* 产品需求
+  * 随着客户个人等级的提升， 系统需要自动更新用户的积分，其中一共有两张表，分别为：用户信息表和积分表
+* Trigger俗称触发器，指可以在数据写入表A之前或者之后可以做一些其他动作
+* 使用Trigger在每次更新用户表的时候出发更新积分表
+
+### 除此之外还有那些
+
+* Function
+* Procedure
