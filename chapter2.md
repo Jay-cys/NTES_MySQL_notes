@@ -361,7 +361,7 @@ CREATE TABLE `order` (
 * Trigger俗称触发器，指可以在数据写入表A之前或者之后可以做一些其他动作
 * 使用Trigger在每次更新用户表的时候出发更新积分表
 
-### 除此之外还有那些
+### 除此之外还有哪些
 
 * Function
 * Procedure
