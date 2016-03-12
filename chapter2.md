@@ -365,3 +365,133 @@ CREATE TABLE `order` (
 
 * Function
 * Procedure
+
+
+## 2.3-MySQL权限管理
+
+### 连接MySQL的必要条件
+
+* 网络要通畅
+* 用户名和密码要正确
+* 数据库需要加IP白名单
+* 更细粒度的验证（库、表、列权限类型等等）
+
+### 数据有哪些权限
+
+`show privileges`命令可以查看全部权限
+
+### 权限粒度
+
+* Data Privileges
+  * DATA: SELECT, INSERT, UPDATE, DELETE
+* Definition Privileges
+  * DataBase: CREATE, ALTER, DROP
+  * Table: CREATE, ALTER, DROP
+  * VIEW/FUNCTION/TRIGGER/PROCEDURE: CREATE, ALTER, DROP
+* Administrator Privileges
+  * Shutdown DataBase
+  * Replication Slave
+  * Replication Client
+  * File Privilege
+
+### MySQL赋权操作
+
+```sql
+GRANT
+  priv_type [(column_list)]
+    [, priv_type [column_list]] ...
+  ON [object_type] priv_level
+  TO user_specification [, user_specification] ...
+  [REQUIRE {NONE | ssl_option [[AND] ssl_option] ...}]
+  [WITH with_option ...]
+GRANT PROXY ON user_specification
+  TO user_specification [, user_specification] ...
+  [WITH GRANT OPTION]
+```
+
+### 如何新建一个用户并赋权
+
+* 使用MySQL自带的命令
+  * `CREATE USER 'netease'@'localhost' IDENTIFIED BY 'netease163';`
+  * `GRANT SELECT ON *.* TO 'netease'@'localhost' WITH GRANT OPTION;`
+
+### 其他方法
+
+* 更改数据库记录
+  * 首先向User表里面插入一条记录，根据自己的需要选择是否向db和table_pirv表插入记录
+  * 执行`flush privileges`命令，让权限信息生效
+
+### 更简单的办法
+
+* GRANT语句会判断是否存在该用户，如果不存在则新建
+  * `GRANT SELECT ON *.* TO 'NETEASE'@'localhost' IDENTIFIED BY 'netease163' WITH GRANT OPTION;`
+
+### 查看用户的权限信息
+
+* 查看当前用户的权限
+  * `show grants;`
+* 查看其它用户的权限
+  * `show grants for netease@'localhost';`
+
+### 如何更改用户的权限
+
+* 回收不需要的权限
+  * `revoke select on *.* from netease@'localhost';`
+* 重新赋权
+  * `grant insert on *.* to netease@'localhost';`
+
+### 如何更改用户密码
+
+* 用新密码，grant语句重新授权
+* 更改数据库记录，Update User表的Password字段
+  * 注意：用这种办法，更改完需要flush privileges刷新权限信息，不推荐
+
+### 删除用户
+
+```sql
+DROP USER user [, user] ...
+```
+
+### With Grant Option
+
+* 允许被授予权利的人把这个权利授予其他的人
+
+### MySQL权限信息存储结构
+
+* MySQL权限信息是存在数据库表中
+* MySQL账号对应的密码也加密存储在数据库表中
+* 每一种权限类型在元数据里都是枚举类型，表明是否有该权限
+
+### 有哪些权限相关的表
+
+* user
+* db
+* table_pirv
+* columns_pirv
+
+### 权限验证流程
+
+查询时从user->db->table_pirv->columns_pirv依次验证，如果通过则执行查询。
+
+### 小结
+
+* MySQL权限信息都是以数据记录的形式存储在数据库的表中。
+* MySQL的权限验证相比网站登录多了白名单环节，并且粒度更细，可以精确到表和字段。
+
+### MySQL权限上有哪些问题
+
+* 使用Binary二进制安装管理用户没有设置密码
+* MySQL默认的test库不受权限控制，存在安全风险
+
+### mysql_secure_installation
+
+* You can set a Password for root accounts.
+* You can remove root accounts that are accessible from outside the localhost.
+* You can remove anonymous-user accounts.
+* You can remove the test database.
+
+### 小结
+
+* 权限相关的操作不要直接操作表，统一使用MySQL命令。
+* 使用二进制安装MySQL安装后，需要重置管理用户(root)的密码。
+* 线上数据库不要留test库
