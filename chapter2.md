@@ -495,3 +495,383 @@ DROP USER user [, user] ...
 * 权限相关的操作不要直接操作表，统一使用MySQL命令。
 * 使用二进制安装MySQL安装后，需要重置管理用户(root)的密码。
 * 线上数据库不要留test库
+
+
+## 2.4-SQL语言进阶
+
+本课程涉及建表SQL
+
+```SQL
+-- ----------------------------
+-- Table structure for `play_fav`
+-- ----------------------------
+DROP TABLE IF EXISTS `play_fav`;
+CREATE TABLE `play_fav` (
+  `userid` bigint(20) NOT NULL COMMENT '收藏用户id',
+  `play_id` bigint(20) NOT NULL COMMENT '歌单id',
+  `createtime` bigint(20) NOT NULL COMMENT '收藏时间',
+  `status` int(11) DEFAULT '0' COMMENT '状态，是否删除',
+  PRIMARY KEY (`play_id`,`userid`),
+  KEY `IDX_USERID` (`userid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='歌单收藏表';
+
+-- ----------------------------
+-- Records of play_fav
+-- ----------------------------
+INSERT INTO play_fav VALUES ('2', '0', '0', '0');
+INSERT INTO play_fav VALUES ('116', '1', '1430223383', '0');
+INSERT INTO play_fav VALUES ('143', '1', '0', '0');
+INSERT INTO play_fav VALUES ('165', '2', '0', '0');
+INSERT INTO play_fav VALUES ('170', '3', '0', '0');
+INSERT INTO play_fav VALUES ('185', '3', '0', '0');
+INSERT INTO play_fav VALUES ('170', '4', '0', '0');
+INSERT INTO play_fav VALUES ('170', '5', '0', '0');
+
+-- ----------------------------
+-- Table structure for `play_list`
+-- ----------------------------
+DROP TABLE IF EXISTS `play_list`;
+CREATE TABLE `play_list` (
+  `id` bigint(20) NOT NULL COMMENT '主键',
+  `play_name` varchar(255) DEFAULT NULL COMMENT '歌单名字',
+  `userid` bigint(20) NOT NULL COMMENT '歌单作者账号id',
+  `createtime` bigint(20) DEFAULT '0' COMMENT '歌单创建时间',
+  `updatetime` bigint(20) DEFAULT '0' COMMENT '歌单更新时间',
+  `bookedcount` bigint(20) DEFAULT '0' COMMENT '歌单订阅人数',
+  `trackcount` int(11) DEFAULT '0' COMMENT '歌曲的数量',
+  `status` int(11) DEFAULT '0' COMMENT '状态,是否删除',
+  PRIMARY KEY (`id`),
+  KEY `IDX_CreateTime` (`createtime`),
+  KEY `IDX_UID_CTIME` (`userid`,`createtime`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='歌单';
+
+-- ----------------------------
+-- Records of play_list
+-- ----------------------------
+INSERT INTO play_list VALUES ('1', '老男孩', '1', '1430223383', '1430223383', '5', '6', '0');
+INSERT INTO play_list VALUES ('2', '情歌王子', '3', '1430223384', '1430223384', '7', '3', '0');
+INSERT INTO play_list VALUES ('3', '每日歌曲推荐', '5', '1430223385', '1430223385', '2', '4', '0');
+INSERT INTO play_list VALUES ('4', '山河水', '2', '1430223386', '1430223386', '5', null, '0');
+INSERT INTO play_list VALUES ('5', '李荣浩', '1', '1430223387', '1430223387', '1', '10', '0');
+INSERT INTO play_list VALUES ('6', '情深深', '5', '1430223388', '1430223389', '0', '0', '1');
+
+-- ----------------------------
+-- Table structure for `song_list`
+-- ----------------------------
+DROP TABLE IF EXISTS `song_list`;
+CREATE TABLE `song_list` (
+  `id` bigint(20) NOT NULL COMMENT '主键',
+  `song_name` varchar(255) NOT NULL COMMENT '歌曲名',
+  `artist` varchar(255) NOT NULL COMMENT '艺术节',
+  `createtime` bigint(20) DEFAULT '0' COMMENT '歌曲创建时间',
+  `updatetime` bigint(20) DEFAULT '0' COMMENT '歌曲更新时间',
+  `album` varchar(255) DEFAULT NULL COMMENT '专辑',
+  `playcount` int(11) DEFAULT '0' COMMENT '点播次数',
+  `status` int(11) DEFAULT '0' COMMENT '状态,是否删除',
+  PRIMARY KEY (`id`),
+  KEY `IDX_artist` (`artist`),
+  KEY `IDX_album` (`album`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='歌曲列表';
+
+-- ----------------------------
+-- Records of song_list
+-- ----------------------------
+INSERT INTO song_list VALUES ('1', 'Good Lovin\' Gone Bad', 'Bad Company', '0', '0', 'Straight Shooter', '453', '0');
+INSERT INTO song_list VALUES ('2', 'Weep No More', 'Bad Company', '0', '0', 'Straight Shooter', '280', '0');
+INSERT INTO song_list VALUES ('3', 'Shooting Star', 'Bad Company', '0', '0', 'Straight Shooter', '530', '0');
+INSERT INTO song_list VALUES ('4', '大象', '李志', '0', '0', '1701', '560', '0');
+INSERT INTO song_list VALUES ('5', '定西', '李志', '0', '0', '1701', '1023', '0');
+INSERT INTO song_list VALUES ('6', '红雪莲', '洪启', '0', '0', '红雪莲', '220', '0');
+INSERT INTO song_list VALUES ('7', '风柜来的人', '李宗盛', '0', '0', '作品李宗盛', '566', '0');
+
+-- ----------------------------
+-- Table structure for `stu`
+-- ----------------------------
+DROP TABLE IF EXISTS `stu`;
+CREATE TABLE `stu` (
+  `id` int(10) NOT NULL DEFAULT '0',
+  `name` varchar(20) DEFAULT NULL,
+  `age` int(10) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- ----------------------------
+-- Records of stu
+-- ----------------------------
+
+-- ----------------------------
+-- Table structure for `tbl_proc_test`
+-- ----------------------------
+DROP TABLE IF EXISTS `tbl_proc_test`;
+CREATE TABLE `tbl_proc_test` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `num` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=30 DEFAULT CHARSET=utf8;
+
+-- ----------------------------
+-- Records of tbl_proc_test
+-- ----------------------------
+INSERT INTO tbl_proc_test VALUES ('11', '1');
+INSERT INTO tbl_proc_test VALUES ('12', '2');
+INSERT INTO tbl_proc_test VALUES ('13', '6');
+INSERT INTO tbl_proc_test VALUES ('14', '24');
+INSERT INTO tbl_proc_test VALUES ('15', '120');
+INSERT INTO tbl_proc_test VALUES ('16', '720');
+INSERT INTO tbl_proc_test VALUES ('17', '5040');
+INSERT INTO tbl_proc_test VALUES ('18', '40320');
+INSERT INTO tbl_proc_test VALUES ('19', '362880');
+INSERT INTO tbl_proc_test VALUES ('20', '3628800');
+INSERT INTO tbl_proc_test VALUES ('21', '1');
+INSERT INTO tbl_proc_test VALUES ('22', '2');
+INSERT INTO tbl_proc_test VALUES ('23', '6');
+INSERT INTO tbl_proc_test VALUES ('24', '24');
+INSERT INTO tbl_proc_test VALUES ('25', '1');
+INSERT INTO tbl_proc_test VALUES ('26', '2');
+INSERT INTO tbl_proc_test VALUES ('27', '6');
+INSERT INTO tbl_proc_test VALUES ('28', '24');
+INSERT INTO tbl_proc_test VALUES ('29', '120');
+
+-- ----------------------------
+-- Table structure for `tbl_test1`
+-- ----------------------------
+DROP TABLE IF EXISTS `tbl_test1`;
+CREATE TABLE `tbl_test1` (
+  `user` varchar(255) NOT NULL COMMENT '主键',
+  `key` varchar(255) NOT NULL,
+  `value` varchar(255) NOT NULL,
+  PRIMARY KEY (`user`,`key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='行列转换测试';
+
+-- ----------------------------
+-- Records of tbl_test1
+-- ----------------------------
+INSERT INTO tbl_test1 VALUES ('li', 'age', '18');
+INSERT INTO tbl_test1 VALUES ('li', 'dep', '2');
+INSERT INTO tbl_test1 VALUES ('li', 'sex', 'male');
+INSERT INTO tbl_test1 VALUES ('sun', 'age', '44');
+INSERT INTO tbl_test1 VALUES ('sun', 'dep', '3');
+INSERT INTO tbl_test1 VALUES ('sun', 'sex', 'female');
+INSERT INTO tbl_test1 VALUES ('wang', 'age', '20');
+INSERT INTO tbl_test1 VALUES ('wang', 'dep', '3');
+INSERT INTO tbl_test1 VALUES ('wang', 'sex', 'male');
+
+-- ----------------------------
+-- Procedure structure for `proc_test1`
+-- ----------------------------
+DROP PROCEDURE IF EXISTS `proc_test1`;
+DELIMITER ;;
+CREATE DEFINER=`root` PROCEDURE `proc_test1`(IN total INT,OUT res INT)
+BEGIN   
+    DECLARE i INT;  
+    SET i = 1;
+    SET res = 1;
+    IF total <= 0 THEN   
+        SET total = 1;   
+    END IF;   
+    WHILE i <= total DO
+        SET res = res * i;
+        INSERT INTO tbl_proc_test(num) VALUES (res);  
+        SET i = i + 1;
+    END WHILE;
+END
+;;
+DELIMITER ;
+```
+
+### 说明
+
+* 本课程介绍以MySQL SQL语法为基础，不同数据库SQL语法存在差异，并未完全遵照ANSI标准。
+* 本课程结合一个实际项目（云音乐），介绍各种SQL语言在实际应用中如何实现业务功能。
+
+### SQL进阶语法——order by
+
+场景1：歌单按时间排序
+
+```sql
+-- 查看全部歌单
+select * from play_list;
+
+-- 按创建时间排序
+select * from play_list order by createtime;
+-- MySQL默认升序，如果按降序排列，则使用如下语句。
+select * from play_list order by createtime desc;
+-- 也可以按照多个字段来排序
+select * from play_list order by bookedcount, trackcount;
+```
+
+### SQL进阶语法——distinct
+
+场景2：统计云音乐创建歌单的用户
+
+```sql
+-- 有重复
+select userid from play_list;
+
+-- 去重
+select distinct userid from play_list;
+
+-- 多个字段
+select distinct userid, play_name from play_list;
+```
+
+* distinct用于返回唯一不同的值
+* 可以返回多列的唯一组合
+* 底层实现使用排序，如果数据量大会消耗较多的IO和CPU
+
+### SQL进阶语法——group by
+
+场景3-1：统计云音乐创建歌单的用户列表和每人创建歌单的数量。
+
+```sql
+-- 每个用户歌单的最大订阅数
+select userid, max(bookedcount) from play_list group by userid;
+
+-- 每个用户歌单的数量
+select userid, count(*) from play_list group by userid;
+```
+
+* group by 根据单列或多列对数据进行分组，通常结合聚合函数使用，如count(\*).
+
+### SQL进阶语法——group by having
+
+场景3-2：统计云音乐创建歌单的用户列表和每人创建歌单的数量，并且只显示歌单数量排序大于等于2的用户
+
+```sql
+select userid, count(*) from play_list group by userid having count(*) >= 2;
+```
+
+* having 是对结果进行过滤
+
+SQL进阶语法-like
+
+```sql
+select * from play_list where play_name like '%男孩%';
+```
+
+| 通配符 | 描述 |
+| :------------- | :------------- |
+| % | 代替一个或多个字符 |
+| _ | 代替单个字符      |
+| [charlist] | 中括号中的任何一个字符 |
+| [^charlist] 或者 [!charlist] | 不在中括号中的任何单一字符 |
+
+* 除了百分号在最右面的情况以外，他会对这个表中所有的记录进行一次查询匹配，而没办法使用索引，效率较低。大表中需要慎用like。可以使用全文检索的手段。
+
+### SQL进阶语法-limit, offset
+
+场景4：查询一个月内创建歌单（从第6行开始显示10条记录）
+
+```sql
+select * from play_list where (createtime between 1427791323 and 1430383307) limit 10 offset 6;
+```
+
+* offset后的值不建议太大，需要消耗的IO较大
+
+### case when
+
+* case when 实现类似编程语言的if else功能，可以对SQL的输出结果进行选择判断。
+
+场景5：对于未录入歌曲的歌单(trackcount = null)，输出结果时歌曲数返回0.
+
+```sql
+select case when play_name, trackcount is null then 0 else trackcount end from play_list;
+```
+
+### select相关进阶语法
+
+```sql
+SELECT
+  [DISTINCT]
+  select_expr [, select_expr ...]
+  [FROM table_references
+  [WHERE where_condition]
+  [GROUP BY {col_name | expr | position}
+    [ASC | DESC], ... [WITH ROLLUP]]
+  [HAVING where_condition]
+  [ORDER BY {col_name | expr | position}
+    [ASC | DESC], ...]
+  [LIMIT { [offset, ] row_count | row_count OFFSET offset}]
+    [FOR UPDATE | LOCK IN SHARE MODE]]
+```
+
+### 连接-Join
+
+连接的作用是用一个SQL语句把多个表中相互关联的数据查出来
+
+场景6：查询收藏“老男孩”歌单的用户列表
+
+```sql
+select * from play_list, play_fav where play_list.id=play_fav.play_id;
+select play_fav.userid from play_list, play_fav where play_list.id=play_fav.play_id and play_list.play_name='老男孩';
+-- 另一种写法
+select f.userid from play_list lst join play_fav f on lst.id=f.play_id where lst.play_name = '老男孩';
+```
+
+### 子查询
+
+* MySQL还有另一种写法，可以实现同样的功能。
+```sql
+select userid from play_fav where play_id=(select id from play_list where play_name = '老男孩');
+```
+
+子查询：内层查询的结果作为外层的比较条件。一般子查询都可以转换成连接，推荐使用连接。
+
+* 不利于MySQL的查询优化器进行优化，可能存在性能问题
+* 连接的实现是嵌套循环，选择一个驱动表，遍历驱动表，查询内层表，依次循环。驱动表会至少查询一边，如果有索引等，内层表可以非常快，查询优化器会选择数据小的表作为驱动表。
+* 子查询由人为规定驱动表和内层表
+
+### 连接- left Join
+
+```sql
+select lst.play_name from play_list lst left join play_fav f on lst.id = f.play_id where f.play_id is null;
+```
+
+* LEFT JOIN从左表(play_list)返回所有的行，即使在右表中(play_fav)中没有匹配的行。
+* 与LEFT JOIN相对应的有RIGHT JOIN关键字，会从右表那里返回所有的行，即使在左表中没有匹配的行。
+
+场景7：查询出没有用户收藏的歌单
+
+### SQL进阶语法-union
+
+场景8：老板想看创建和收藏歌单的所有用户，查询play_list和play_fav两表中所有的userid
+
+```sql
+select userid from play_list union select userid from play_fav;
+-- 默认会去重， 不想去重的话使用union all代替union。
+```
+
+### DML进阶语法
+
+* 多值插入： insert into table values(....),(....)
+  * 可以一次插入多行数据，减少与数据库的交互提高效率
+  * eg： `insert into A values(4, 33), (5, 33);`
+* 覆盖插入： replace into table values (....)
+  * 可以简化业务逻辑的判断
+* 忽略插入： insert ignore into table value (....)
+  * 可以简化业务逻辑的判断
+* 查询插入： insert into table_a select \* from table_b
+  * 常用于导表操作
+* insert主键重复则update
+  * `INSERT INTO TABLE tbl VALUES (id, col1, col2) ON DUPLICATE KEY UPDATE col2=....;`
+  * eg: `insert into A values(2, 40) on duplicate key update age=40;`
+  * 可以简化前端业务逻辑的判断
+* 连表update
+  * A表：id, age
+  * B表：id, name, age
+  * A表id与B表id关联，根据B表的age值更新A表的age。
+  * eg: `update A,B set A.age=B.age where A.id=B.id;`
+* 连表删除
+  * A表：id, age
+  * B表：id, name, age
+  * A表id与B表id关联，根据B表的age值删除A表的数据。
+  * eg: `delete A from A,B where A.id=B.id and B.name='pw';`
+
+### 总结
+
+* select查询进阶语法
+  * order by/distinct/group by having (聚合函数) /like (%前缀后缀)
+* 连接语法
+  * 内连接、左连接、右连接、 Union [ALL]
+* DML进阶语法
+  * insert/连表update/连表delete
