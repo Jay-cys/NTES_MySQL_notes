@@ -15,3 +15,5 @@
 * [MySQL数据库对象与应用](https://github.com/yumendy/NTES_MySQL_notes/blob/master/chapter2.md#mysql数据库对象与应用)
   * [2.1-MySQL数据类型](https://github.com/yumendy/NTES_MySQL_notes/blob/master/chapter2.md#21-mysql数据类型)
   * [2.2-MySQL数据对象](https://github.com/yumendy/NTES_MySQL_notes/blob/master/chapter2.md#22-mysql数据对象)
+  * [2.3-MySQL权限管理](https://github.com/yumendy/NTES_MySQL_notes/blob/master/chapter2.md#23-mysql权限管理)
+  * [2.4-SQL语言进阶](https://github.com/yumendy/NTES_MySQL_notes/blob/master/chapter2.md#24-sql语言进阶)

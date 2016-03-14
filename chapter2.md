@@ -875,3 +875,161 @@ select userid from play_list union select userid from play_fav;
   * 内连接、左连接、右连接、 Union [ALL]
 * DML进阶语法
   * insert/连表update/连表delete
+
+
+## 2.5-内置函数
+
+### 聚合函数
+
+* 聚合函数面向一组数据，对数据进行聚合运算后返回单一的值。
+* MySQL聚合函数的基本语法：`SELECT function(列) from 表`
+* 常用聚合函数：
+
+| 函数 | 描述 |
+| :------------- | :------------- |
+| AVG() | 返回列的平均值 |
+| COUNT(DISTINCT) | 返回列去重后的行数 |
+| COUNT() | 返回列的行数 |
+| MAX() | 返回列的最大值 |
+| MIN() | 返回列的最小值 |
+| SUM() | 返回列的总和 |
+| GROUP_CONCAT() | 返回一组值的连接字符串(MySQL独有) |
+
+*实例还是上节中的那些表*
+
+场景1：查询每张专辑总的点播次数和每首歌的平均点播次数。
+
+```sql
+select album, sum(playcount), avg(playcount) from song_list group by album;
+```
+
+场景2：查询全部歌曲中的最大的播放次数和最小的播放次数。
+
+```sql
+select max(playcount), min(playcount) from song_list;
+```
+
+场景2续：查询播放次数最多的歌曲
+
+```sql
+-- 错误查法
+select song_name, max(playcount) from song_list;
+-- 正确查法
+select song_name, playcount from song_list order by playcount desc limit 1;
+```
+
+* `select count(*) from song_list;`
+* `select count(1) from song_list;`
+* `select count(song_name) from song_list;`
+
+`count(*)`和`count(1)`基本一样，没有明显的性能差异。
+`count(*)`和`count(song_name)`差别在于`count(song_name)`会除去song_name is null的情况
+
+场景3：显示每张专辑的歌曲列表
+
+```sql
+select album, GROUP_CONCAT(song_name) from song_list group by album;
+-- 默认最大只能连接1024个字符，但是可以通过改数据库参数来改变。
+```
+
+### 使用聚合函数做数据库行列转换
+
+```sql
+select user,
+max(case when 'key'='age' then value end) age,
+max(case when 'key'='sex' then value end) sex,
+max(case when 'key'='dep' then value end) dep,
+from tbl_test1
+group by user;
+```
+
+### 预定义函数
+
+* 预定义函数面向单值数据，返回一对一的处理结果(聚合函数可以理解成多对一)。
+* 预定义函数基本语法：
+  ```sql
+  select function(列) from 表;
+  select * from 表 where 列 = function(value) ...
+  ```
+
+### 预定义函数-字符串函数
+
+| 函数 | 描述 |
+| :------------- | :------------- |
+| LENGTH() | 返回列的字节数 |
+| CHAR_LENGTH() | 返回列的字符数 |
+| TRIM()/RTRIM()/LTRIM() | 去除两边空格/去除右边空格/去除左边空格 |
+| SUBSTRING(str, pos, [len]) | 从pos位置截取字符串str，截取len长度 |
+| LOCATE(substr, str, [pos]) | 返回substr在str字符串中的位置 |
+| REPLACE(str, from_str, to_str) | 将str字符串中的from_str替换成to_str |
+| LOWER(), UPPER() | 字符串转换为小写/大写 |
+
+* 字符串函数 - 实例
+
+```sql
+SELECT SUBSTRING('abcdef', 3);
+-- 'cdef'
+SELECT SUBSTRING('abcdef', -3);
+-- 'def'
+SELECT SUBSTRING('abcdef', 3, 2);
+-- 'cd'
+SELECT LOCATE('bar', 'foobarbar');
+-- 4
+SELECT LOCATE('xbar', 'foobar');
+-- 0
+SELECT LOCATE('bar', 'foobarbar', 5);
+-- 7
+```
+
+### 预定义函数-时间处理函数
+
+| 函数  | 描述 |
+| :------------- | :------------- |
+| CURDATE() | 当前日期 |
+| CURTIME() | 当前时间 |
+| NOW() | 显示当前时间日期(常用) |
+| UNIX_TIMESTAMP() | 当前时间戳 |
+| DATE_FORMAT(date, format) | 按指定格式显示时间 |
+| DATE_ADD(date, INTERVAL unit) | 计算指定日期向后加一段时间的日期 |
+| DATE_SUB(date, INTERVAL unit) | 计算指定日期向前减一段时间的日期 |
+
+* 实例：
+
+```sql
+SELECT NOW() + INTERVAL 1 MONTH;
+SELECT NOW() - INTERVAL 1 WEEK;
+```
+
+### 预定义函数-数字处理函数
+
+| 函数 | 描述 |
+| :------------- | :------------- |
+| ABS() | 返回数值的绝对值 |
+| CEIL() | 对小数向上取整 CEIL(1.2)=2 |
+| ROUND() | 四舍五入 |
+| POW(num, n) | num的n次幂 POW(2, 2)=4 |
+| FLOOR() | 对小数向下取整 CELL(1.2)=1 |
+| MOD(N, M) | 取模(返回n除以m的余数)=N % M |
+| RAND() | 取0~1之间的一个随机数 |
+
+### 算数、逻辑运算
+
+* 比较运算
+
+| 函数 | 描述 |
+| :------------- | :------------- |
+| IS, IS NOT | 判定布尔值 IS True, IS NOT False, IS NULL |
+| >, >= | 大于，大于等于 |
+| <, <= | 小于，小于等于 |
+| = | 等于 |
+| !=, <> | 不等于 |
+| BETWEEN M AND N | 取M和N之间的值 |
+| IN, NOT IN | 检查是否在或不在一组值之中 |
+
+实例：查询一个月内userid为1,3,5的用户创建的歌单
+```sql
+select * from play_list where (createtime between 1427791323 and 1430383307) and userid in (1,3,5);
+```
+
+* `*,/,DIV,%,MOD,-,+`
+* `NOT, AND, &&, XOR, OR, ||`
