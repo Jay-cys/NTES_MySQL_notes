@@ -17,3 +17,4 @@
   * [2.2-MySQL数据对象](https://github.com/yumendy/NTES_MySQL_notes/blob/master/chapter2.md#22-mysql数据对象)
   * [2.3-MySQL权限管理](https://github.com/yumendy/NTES_MySQL_notes/blob/master/chapter2.md#23-mysql权限管理)
   * [2.4-SQL语言进阶](https://github.com/yumendy/NTES_MySQL_notes/blob/master/chapter2.md#24-sql语言进阶)
+  * [2.5-内置函数](https://github.com/yumendy/NTES_MySQL_notes/blob/master/chapter2.md#25-内置函数)

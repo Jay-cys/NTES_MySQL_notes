@@ -1033,3 +1033,192 @@ select * from play_list where (createtime between 1427791323 and 1430383307) and
 
 * `*,/,DIV,%,MOD,-,+`
 * `NOT, AND, &&, XOR, OR, ||`
+
+
+## 2.6-触发器与存储过程
+
+### 触发器
+
+* 是什么
+  * 触发器是加在表上的一个特殊程序，当表上出现特定的事件(INSERT/UPDATE/DELETE)时触发该程序执行。
+* 做什么
+  * 数据订正；迁移表；实现特定的业务逻辑。
+
+### 触发器-基本语法
+
+```sql
+CREATE
+[DEFINER = { user | CURRENT_USER }]
+TRIGGER trigger_name trigger_time
+trigger_event ON tbl_name
+FOR EACH ROW
+trigger_body t
+
+trigger_time: { BEFORE | AFTER }
+trigger_event: { INSERT | UPDATE | DELETE }
+```
+
+### 触发器-实例
+
+学生表：
+
+```sql
+CREATE TABLE `stu` (
+  `name` varchar(50),
+  `course` varchar(50),
+  `score` int(11),
+  PRIMARY KEY (`name`)
+) ENGINE=InnoDB;
+```
+
+用于更正成绩的触发器：
+
+```sql
+DELIMITER //
+CREATE TRIGGER trg_upd_score
+BEFORE UPDATE ON `stu`
+FOR EACH ROW
+BEGIN
+  IF NEW.score < 0 THEN
+    SET NEW.score = 0;
+  ELSEIF NEW.score > 100 THEN
+    SET NEW.score = 100;
+  END IF;
+END; //
+DELIMITER ;
+```
+
+### 注意事项
+
+* 触发器对性能有损耗，应慎重使用。
+* 同一类事件在一个表中只能创建一次。
+* 对于事务表，触发器执行失败则整个语句回滚。
+* Row格式的主从复制，触发器不会在从库上执行。
+* 使用触发器时应防止递归执行。
+
+### 存储过程
+
+* 定义：存储过程是存储在数据库的一组SQL语句集，用户可以通过存储过程名和传参多次调用的程序模块。
+* 特点：
+  * 使用灵活，可以使用流控制语句，自定义变量等完成复杂的业务逻辑。
+  * 提高数据安全性，屏蔽应用程序直接对表的操作，易于进行审计。
+  * 减少网络传输。
+  * 提高代码维护的复杂度，实际使用中要评估场景是否适合。
+
+### 存储过程-基本语法
+
+```sql
+CREATE
+  [DEFINER = { user | CURRENT_USER }]
+  PROCEDURE sp_name ([proc_parameter[,...]])
+  [characteristic ...] routine_body
+
+proc_parameter:
+  [ IN | OUT | INOUT ] param_name type
+type:
+  Any valid MySQL data type
+characteristic:
+    COMMENT 'string'
+  | [NOT] DETERMINISTIC
+routine_body:
+  Valid SQL routine statement
+```
+
+### 存储过程-实例
+
+```sql
+CREATE PROCEDURE proc_test1
+(IN total INT, OUT res INT)
+BEGIN
+  DECLARE i INT;
+  SET i = 1;
+  SET res = 1;
+  IF total <= 0 THEN
+    SET total = 1;
+  END IF;
+  WHILE i <= total DO
+    SET res = res * i;
+    INSERT INTO tbl_proc_test(num) VALUES (res);
+    SET i = i + 1;
+  END WHILE;
+END;
+```
+
+### 存储过程-流控制语句
+
+| 流控制 | 描述 |
+| :------------- | :------------- |
+| IF | IF search_condition THEN statement_list [ELSEIF search_condition THEN statement_list][ELSE statement_list] END IF |
+| CASE | CASE case_value WHEN when_value THEN statement_list [ELSE statement_list] END CASE |
+| WHILE | WHILE search_condition DO statement_list END WHILE |
+| REPEAT | REPEAT statement_list UNTIL search_condition END REPEAT |
+
+### 存储过程-调用
+
+```sql
+set @total=10;
+set @res=1;
+call proc_test1(@total, @res);
+select @res;
+```
+
+### 自定义函数
+
+* 自定义函数与存储过程类似，但是必须带有返回值(RETURN)。
+* 自定义函数与sum(), max()等MySQL原生函数使用方法类似：
+  ```sql
+  SELECT func(val);
+  SELECT * from tbl where col=func(val);
+  ```
+* 由于自定义函数可能在遍历数据中使用，要注意性能损耗
+
+### 自定义函数-基本语法
+
+```sql
+CREATE
+  [DEFINER = { user | CURRENT_USER}]
+  FUNCTION sp_name ([func_parameter[,...]])
+  RETURNS type
+  [characteristic ...] routine_body
+func_parameter:
+  param_name type
+type:
+  Any valid MySQL data type
+characteristic:
+    COMMENT 'string'
+  | [NOT] DETERMINISTIC
+routine_body:
+  Valid SQL routine statement
+```
+
+### 自定义函数-实例
+
+```sql
+CREATE FUNCTION func_test1 (total INT)
+RETURNS INT
+BEGIN
+  DECLARE i INT;
+  DECLARE res INT;
+  SET i = 1;
+  SET res = 1;
+  IF total <= 0 THEN
+    SET total = 1;
+  END IF;
+  WHILE i < total DO
+    SET res = res * i;
+    SET i = i + 1;
+  END WHILE;
+  RETURN res;
+END;
+```
+
+### 自定义函数-调用
+
+```sql
+select func_test1(4);
+```
+
+### 小结
+
+* 知识点：触发器、存储过程、自定义函数
+* 互联网场景：触发器和存储过程不利于水平扩展，多用于统计和运维操作中。
