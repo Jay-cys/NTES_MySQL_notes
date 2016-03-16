@@ -1222,3 +1222,149 @@ select func_test1(4);
 
 * 知识点：触发器、存储过程、自定义函数
 * 互联网场景：触发器和存储过程不利于水平扩展，多用于统计和运维操作中。
+
+
+## 2.7-MySQL字符集
+
+### 字符集基础
+
+* 字符集：数据库中的字符集包含两层含义
+  * 各种文字和符号的集合，包括各国家文字、标点符号、图形符号、数字等。
+  * 字符的编码方式，即二进制数据与字符的映射规则。
+
+### 字符集-分类
+
+* ASCII：美国信息互换标准编码；英语和其他西欧语言；单字节编码，7位表示一个字符，共128字符。
+* GBK：汉字内码扩展规范；中日韩汉字、英文、数字；双字节编码；共收录了21003个汉字，GB2312的扩展。
+* UTF-8:Unicode标准的可变长度字符编码；Unicode标准（统一码），业界统一标准，包括世界上数十种文字的系统；UTF-8使用一至四个字节为每个字符编码。
+* 其他常见字符集：UTF-32，UTF-16，Big5，latin1
+
+### MySQL字符集
+
+* 查看字符集
+
+```sql
+SHOW CHARACTER SET;
+```
+
+* 新增字符集
+
+```bash
+# 编译时加入： --with-charset=
+./configure --prefix=/usr/local/mysql3 --with-plugins=innobase --with-charset=gbk
+```
+
+### 字符集与字符序
+
+* charset和collation
+  * collation：字符序，字符的排序与比较规则，每个字符集都有对应的多套字符序。
+  * 不同的字符序决定了字符串在比较排序中的精度和性能不同。
+
+查看字符序
+
+```sql
+show collation;
+```
+
+mysql的字符序遵从命名惯例：以_ci(表示大小写不敏感)，以_CS(表示大小写敏感)，以_bin(表示用编码值进行比较)。
+
+### 字符集设置级别
+
+* charset和collation的设置级别：
+  * 服务器级 >> 数据库级 >> 表级 >> 列级
+* 服务器级
+  * 系统变量(可动态设置)：
+    * character_set_server：默认的内部操作字符集
+    * character_set_system：系统元数据(各字段名等)字符集
+
+### 字符集设置级别
+
+* 服务器级
+
+```
+配置文件
+
+[mysqld]
+character_set_server=utf8
+collation_server=utf8_general_ci
+```
+
+* 数据库级
+
+```sql
+CREATE DATABASE db_name CHARACTER SET latin1 COLLATE latin1_swedish_ci;
+```
+
+- character_set_database：当前选中数据库的默认字符集
+
+主要影响load data等语句的默认字符集，CREATE DATABASE的字符集如果不设置，默认使用character_set_server的字符集。
+
+* 表级
+
+```sql
+CREATE TABLE tbl1 (....) DEFAULT CHARSET=utf8 DEFAULT COLLATE=utf8_bin;
+```
+
+* 列级
+
+```sql
+CREATE TABLE tbl1 (col1 VARCHAR(5) CHARACTER SET latin1 COLLATE latin1_german1_ci);
+```
+
+### 字符集设置级别
+
+* 数据存储字符集使用规则：
+  * 使用列集的CHARACTER SET设定值；
+  * 若列级字符集不存在，则使用对应表级的DEFAULT CHARACTER SET设定值；
+  * 若表级字符集不存在，则使用数据库级的DEFAULT CHARACTER SET设定值；
+  * 若数据库级字符集不存在，则使用服务器级character_set_server设定值。
+
+```sql
+-- 查看字符集
+show [global] variables like 'character%';
+show [global] variables like 'collation%';
+
+-- 修改字符集
+set global character_set_server=utf8; -- 全局
+alter table xxx convert to character set xxx; -- 表
+```
+
+### 客户端连接与字符集
+
+* 连接与字符集
+  * character_set_client：客户端来源数据使用的字符集。
+  * character_set_connection：连接层字符集。
+  * character_set_results：查询结果字符集。
+
+```
+mysql > set names utf8;
+
+配置文件设置：
+[mysql]
+default-character-set=utf8
+```
+
+* 字符转换过程
+
+client > character_set_client > character_set_connection > Storage > character_set_results >client
+
+推荐使用统一的字符集
+
+* 常见乱码原因：
+  * 数据存储字符集不能正确编码(不支持)client发来的数据：client(utf8)->Storage(latin1)
+  * 程序连接使用的字符集与通知mysql的character_set_client等不一致或不兼容。
+
+* 使用建议
+  * 创建数据库/表时显式的指定字符集，不使用默认。
+  * 连接字符集与存储字符集设置一致，推荐使用utf8。
+  * 驱动程序连接时显式指定字符集(set names XXX).
+
+* mysql CAPI:初始化数据库句柄后马上用mysql_options设定MYSQL_CHARSET_NAME属性为utf8.
+* mysql php API:连接到数据库以后显式用SET NAMES语句设置一次连接字符集。
+* mysql JDBC: url="jdbc:mysql://localhost:3306/blog_dbo?user=xx&password=xx&userUnicode=true&characterEncoding=utf8"
+
+### 小结
+
+* 字符集：表示的字符集和/字符编码方式
+* 字符的设置级别：服务器/数据库/表/列
+* 客户端字符集：乱码产生的原因与解决方式
