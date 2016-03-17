@@ -1368,3 +1368,249 @@ client > character_set_client > character_set_connection > Storage > character_s
 * 字符集：表示的字符集和/字符编码方式
 * 字符的设置级别：服务器/数据库/表/列
 * 客户端字符集：乱码产生的原因与解决方式
+
+
+## 2.8程序连接MySQL
+
+### 程序连接MySQL基本原理
+
+JDBC客户端应用 -> java.sql.*或javax.sql.* -> 驱动程序 -> SQLserver/Oracle/MySQL
+
+### Java代码示例
+
+结构：
+
+DriverManager
+-> Driver(是驱动程序对象的接口，指向具体数据库驱动程序对象)=DriverManager.getDriver(String URL)
+-> Connectinon(是连接对象接口，指向具体数据库连接对象)=DriverManager.getConnection(String URL)
+-> Statement(执行静态SQL语句接口)=Connection.CreateStatement()
+-> ResultSet(是指向结果集对象的接口)=Statement.excuteXXX()
+
+
+```java
+import java.sql.*;
+
+/**
+ * 使用JDBC连接MySQL
+ */
+public class DBTest {
+
+    public static Connection getConnection() throws SQLException,
+            java.lang.ClassNotFoundException
+    {
+        //第一步：加载MySQL的JDBC的驱动
+        Class.forName("com.mysql.jdbc.Driver");
+
+        //设置MySQL连接字符串,要访问的MySQL数据库 ip,端口,用户名,密码
+        String url = "jdbc:mysql://localhost:3306/blog";        
+        String username = "blog_user";
+        String password = "blog_pwd";
+
+        //第二步：创建与MySQL数据库的连接类的实例
+        Connection con = DriverManager.getConnection(url, username, password);        
+        return con;        
+    }
+
+
+    public static void main(String args[]) {
+        Connection con = null;
+        try
+        {
+            //第三步：获取连接类实例con，用con创建Statement对象类实例 sql_statement
+            con = getConnection();            
+            Statement sql_statement = con.createStatement();
+
+            /************ 对数据库进行相关操作 ************/                
+            //如果同名数据库存在，删除
+            sql_statement.executeUpdate("drop table if exists user;");            
+            //执行了一个sql语句生成了一个名为user的表
+            sql_statement.executeUpdate("create table user (id int not null auto_increment," +
+                    " name varchar(20) not null default 'name', age int not null default 0, primary key (id) ); ");
+
+            //向表中插入数据
+            System.out.println("JDBC 插入操作:");
+            String sql = "insert into user(name,age) values('liming', 18)";
+
+            int num = sql_statement.executeUpdate("insert into user(name,age) values('liming', 18)");
+            System.out.println("execute sql : " + sql);
+            System.out.println(num + " rows has changed!");
+            System.out.println("");
+
+            //第四步：执行查询，用ResultSet类的对象，返回查询的结果
+            String query = "select * from user";            
+            ResultSet result = sql_statement.executeQuery(query);
+
+            /************ 对数据库进行相关操作 ************/
+
+            System.out.println("JDBC 查询操作:");
+            System.out.println("------------------------");
+            System.out.println("userid" + " " + "name" + " " + "age ");
+            System.out.println("------------------------");
+
+            //对获得的查询结果进行处理，对Result类的对象进行操作
+            while (result.next())
+            {
+                int userid =   result.getInt("id");
+                String name    =   result.getString("name");
+                int age        =   result.getInt("age");
+                //取得数据库中的数据
+                System.out.println(" " + userid + " " + name + " " + age);                
+            }
+
+            //关闭 result,sql_statement
+            result.close();
+            sql_statement.close();
+
+            //使用PreparedStatement更新记录
+            sql = "update user set age=? where name=?;";
+            PreparedStatement pstmt = con.prepareStatement(sql);
+
+            //设置绑定变量的值
+            pstmt.setInt(1, 15);
+            pstmt.setString(2, "liming");
+
+            //执行操作
+            num = pstmt.executeUpdate();
+
+            System.out.println("");
+            System.out.println("JDBC 更新操作:");
+            System.out.println("execute sql : " + sql);
+            System.out.println(num + " rows has changed!");
+
+            //关闭PreparedStatement
+            pstmt.close();
+
+
+            //流式读取result，row-by-row
+            query = "select * from user";            
+            PreparedStatement ps = (PreparedStatement) con.prepareStatement
+            (query,ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);  
+
+            ps.setFetchSize(Integer.MIN_VALUE);  
+
+            result = ps.executeQuery();  
+
+            /************ 对数据库进行相关操作 ************/
+
+            System.out.println("JDBC 查询操作:");
+            System.out.println("------------------------");
+            System.out.println("userid" + " " + "name" + " " + "age ");
+            System.out.println("------------------------");
+
+            //对获得的查询结果进行处理，对Result类的对象进行操作
+            while (result.next())
+            {
+                int userid =   result.getInt("id");
+                String name    =   result.getString("name");
+                int age        =   result.getInt("age");
+                //取得数据库中的数据
+                System.out.println(" " + userid + " " + name + " " + age);                
+            }
+
+            //关闭 result,ps
+            result.close();
+            ps.close();
+            con.close();
+
+        } catch(java.lang.ClassNotFoundException e) {
+            //加载JDBC错误,所要用的驱动没有找到
+            System.err.print("ClassNotFoundException");
+            //其他错误
+            System.err.println(e.getMessage());
+        } catch (SQLException ex) {
+            //显示数据库连接错误或查询错误
+            System.err.println("SQLException: " + ex.getMessage());
+        }
+
+
+    }
+
+}
+```
+
+### JDBC使用技巧
+
+* Statement与PreparedStatement的区别
+* connection, Statement与ResultSet关闭的意义
+* jdbc连接参数的使用
+* ResultSet游标的使用(setFetchSize)
+
+### Statement与PreparedStatement的区别
+
+* PreparedStatement在数据库端预编译，效率高，可以防止SQL注入。
+* 对数据库执行一次性存取的时候，用Statement对象进行处理。
+* 线上业务推荐使用PreparedStatement.
+
+### PreparedStatement背后的故事
+
+PREPARE -> EXECUTE -> DEALLOCATE PREPARE
+
+```sql
+PREPARE stmt1 FROM 'SELECT productCode, productName
+                    From products
+                    WHERE productCode = ?';
+SET @pc = 'S10_1678';
+EXECUTE stmt1 USING @pc;
+
+DEALLOCATE PREPARE stmt1;
+```
+
+### connection, Statement与ResultSet关闭的意义
+
+* MySQL数据库端为connection与ResultSet维护内存状态，一直不关闭会占用服务端资源。
+* MySQL最大连接数受max_connections限制，不能无限创建连接，所以用完要及时关闭。
+* JDBC connection关闭后ResultSet, Statement会自动关闭。但是如果使用连接池将不会关闭，因此推荐主动关闭。
+
+### jdbc连接参数的使用
+
+* 字符集设置：
+
+url="jdbc:mysql://localhost:3306/blog_dbo?userUnicode=true&characterEncoding=utf8";
+
+* 超时设置：
+
+url="jdbc:mysql://localhost:3306/blog_dbo?connectionTimeout=1000&socketTimeout=30000";
+
+
+### ResultSet游标的使用
+
+* 默认的ResultSet对象不可更新，仅有一个向前移动的指针。因此，只能迭代它一次，并且只能按从第一行到最后一行的顺序进行。可以生成可滚动和/或可更新的ResultSet对象。
+* setFetchSize()是设置ResultSet每次向数据库取的行数，防止数据返回量过大将内存爆掉。
+
+### Python连接MySQL
+
+* Python：脚本语言，无需编译、易开发
+* DBA使用Python的一般场景是编写自动化运维工具、报表、数据迁移
+* Python MySQL驱动：python-mysqldb
+
+
+```python
+import MySQLdb
+
+# 建立和mysql数据库的连接
+conn = MySQLdb.connect(host='localhost', port=3306,user='bloguser',passwd='xxxx')
+# 获取游标
+curs = conn.cursor()
+
+# 选择数据库
+conn.select_db('blog')
+
+# 执行SQL，创建一个表
+curs.execute("create table blog (id int, name varchar(200))")
+
+# 插入一条记录
+value = [1, 'user1']
+curs.execute("insert into blog values(%s, %s)", value)
+
+# 插入多条记录
+values = [(2, "user2"), (3, "user3")]
+curs.executemany("insert into blog values(%s, %s)", values)
+
+# 提交
+conn.commit()
+
+# 关闭游标
+curs.close()
+# 关闭连接
+conn.close()
+```

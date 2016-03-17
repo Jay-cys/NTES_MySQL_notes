@@ -19,3 +19,4 @@
   * [2.4-SQL语言进阶](https://github.com/yumendy/NTES_MySQL_notes/blob/master/chapter2.md#24-sql语言进阶)
   * [2.5-内置函数](https://github.com/yumendy/NTES_MySQL_notes/blob/master/chapter2.md#25-内置函数)
   * [2.6-触发器与存储过程](https://github.com/yumendy/NTES_MySQL_notes/blob/master/chapter2.md#26-触发器与存储过程)
+  * [2.7-MySQL字符集](https://github.com/yumendy/NTES_MySQL_notes/blob/master/chapter2.md#27-mysql字符集)
