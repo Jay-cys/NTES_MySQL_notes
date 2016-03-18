@@ -1374,7 +1374,7 @@ client > character_set_client > character_set_connection > Storage > character_s
 
 ### 程序连接MySQL基本原理
 
-JDBC客户端应用 -> java.sql.*或javax.sql.* -> 驱动程序 -> SQLserver/Oracle/MySQL
+JDBC客户端应用 -> java.sql.\*或javax.sql.\* -> 驱动程序 -> SQLserver/Oracle/MySQL
 
 ### Java代码示例
 
