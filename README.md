@@ -21,3 +21,4 @@
   * [2.6-触发器与存储过程](https://github.com/yumendy/NTES_MySQL_notes/blob/master/chapter2.md#26-触发器与存储过程)
   * [2.7-MySQL字符集](https://github.com/yumendy/NTES_MySQL_notes/blob/master/chapter2.md#27-mysql字符集)
   * [2.8程序连接MySQL](https://github.com/yumendy/NTES_MySQL_notes/blob/master/chapter2.md#28程序连接mysql)
+  * [2.9-DAO框架的使用](https://github.com/yumendy/NTES_MySQL_notes/blob/master/chapter2.md#29-dao框架的使用)
