@@ -22,5 +22,6 @@
   * [2.7-MySQL字符集](https://github.com/yumendy/NTES_MySQL_notes/blob/master/chapter2.md#27-mysql字符集)
   * [2.8程序连接MySQL](https://github.com/yumendy/NTES_MySQL_notes/blob/master/chapter2.md#28程序连接mysql)
   * [2.9-DAO框架的使用](https://github.com/yumendy/NTES_MySQL_notes/blob/master/chapter2.md#29-dao框架的使用)
-  * [MySQL事务与存储引擎](https://github.com/yumendy/NTES_MySQL_notes/blob/master/chapter3.md#mysql事务与存储引擎)
+* [MySQL事务与存储引擎](https://github.com/yumendy/NTES_MySQL_notes/blob/master/chapter3.md#mysql事务与存储引擎)
   * [3.1-数据库事务](https://github.com/yumendy/NTES_MySQL_notes/blob/master/chapter3.md#31-数据库事务)
+  * [3.2-存储引擎概述](https://github.com/yumendy/NTES_MySQL_notes/blob/master/chapter3.md#32-存储引擎概述)
