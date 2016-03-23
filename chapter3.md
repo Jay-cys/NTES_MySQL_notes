@@ -203,3 +203,90 @@ set tx_isolation = ''
 ### 改变表的存储引擎
 
 `alter table m ENGINE=innodb;`
+
+
+## 3.3-InnoDB存储引擎
+
+### InnoDB存储引擎体系架构
+
+![InnoDB](/sorence/images/02.png)
+
+### InnoDB相关的磁盘文件
+
+| 文件 | 名称 | 数量 | 位置 |
+| :------------- | :------------- | :------------- | :------------- |
+| 系统表空间 | ibdata1 | 一个实例一个 | innodb_data_home_dir |
+| 日志文件 | ib_logfile0/1 | 一个实例两个(可配置) | innodb_log_group_home_dir |
+| 表定义文件 | 表名.frm | 每张表一个 | Schema目录下 |
+| 表数据文件 | 表名.ibd | 如果innodb_file_per_table = 1, 则每张表一个 | Schema目录下 |
+
+### InnoDB系统表空间文件
+
+* ibdata1里存放了什么:
+  * 回滚段
+  * 所有InnoDB表元数据信息
+  * Double Write, Insert buffer dump等等....
+* 自动扩展机制
+
+### InnoDB与磁盘文件有关的参数
+
+| 参数 | 样例值 | 备注 |
+| :------------- | :------------- | :------------- |
+| innodb_data_home_dir | /data/mysql/node_1 | 数据主目录 |
+| innodb_log_group_home_dir | /data/mysql/node_1 | 一般同上 |
+| innodb_data_file_path | ibdata1:512M:autoextned | 请开启autoextned |
+| innodb_autoextend_increment | 128 | MB,勿太大或太小 |
+| innodb_file_per_table | 1 | 强烈建议开启 |
+| innodb_log_file_size | 100MB | 性能相关 |
+| innodb_log_files_in_group | 2 | 性能相关  |
+
+### InnoDB数据文件存储结构
+
+* 索引组织表(聚簇表)
+* 根据表逻辑主键排序
+* 数据节点每页16K
+* 根据主键寻址速度很快
+* 主键值递增的insert插入效率较好
+* 主键值随机insert插入效率差
+* 因此，InnoDB表必须指定主键，建议使用自增数字
+
+### InnoDB数据块缓存池
+
+* 数据的读写需要经过缓存
+* 数据以整页(16K)为单位读取到缓存中
+* 缓存中的数据以LRU策略换出
+* IO效率高，性能好
+
+### InnoDB Buffer Pool相关参数
+
+| 参数 | 样例值 | 备注 |
+| :------------- | :------------- | :------------- |
+| innodb_buffer_pool_size | 10G | 根据总物理内存设置 |
+
+### InnoDB数据持久化与事务日志
+
+* 事务日志实时持久化
+* 内存变化数据(脏数据)增量异步刷出到磁盘
+* 实例故障靠重放日志恢复
+* 性能好，可靠，恢复快
+
+### InnoDB日志持久化相关参数
+
+| 参数 | 样例值 | 备注 |
+| :------------- | :------------- | :------------- |
+| innodb_flush_log_at_trx_commit | 1 | 可选：0：每隔1s写入并持久化一次日志。1：每次commit都写入并持久化日志。2：每次提交日志写到内存，每1s持久化一次 |
+
+### InnoDB行级锁
+
+* 写不阻塞读
+* 不同行间的写互相不阻塞
+* 并发性能好
+
+### InnoDB与事务ACID
+
+* 事务ACID特性完整支持
+  * 回滚段失败回滚
+  * 支持主外键约束
+  * 事务版本+回滚段=MVCC
+  * 事务日志持久化
+* 默认可重复读隔离级别，可以调整
