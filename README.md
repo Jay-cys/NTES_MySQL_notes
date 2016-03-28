@@ -27,3 +27,5 @@
   * [3.2-存储引擎概述](https://github.com/yumendy/NTES_MySQL_notes/blob/master/chapter3.md#32-存储引擎概述)
   * [3.3-InnoDB存储引擎](https://github.com/yumendy/NTES_MySQL_notes/blob/master/chapter3.md#33-innodb存储引擎)
   * [3.4-InnoDB事务锁](https://github.com/yumendy/NTES_MySQL_notes/blob/master/chapter3.md#34-innodb事务锁)
+* [MySQL应用优化](https://github.com/yumendy/NTES_MySQL_notes/blob/master/chapter4.md#mysql应用优化)
+  * [4.1-MySQL索引优化与设计](https://github.com/yumendy/NTES_MySQL_notes/blob/master/chapter4.md#41-mysql索引优化与设计)
