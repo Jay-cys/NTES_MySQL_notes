@@ -29,3 +29,5 @@
   * [3.4-InnoDB事务锁](https://github.com/yumendy/NTES_MySQL_notes/blob/master/chapter3.md#34-innodb事务锁)
 * [MySQL应用优化](https://github.com/yumendy/NTES_MySQL_notes/blob/master/chapter4.md#mysql应用优化)
   * [4.1-MySQL索引优化与设计](https://github.com/yumendy/NTES_MySQL_notes/blob/master/chapter4.md#41-mysql索引优化与设计)
+  * [4.2-MySQL数据库设计](https://github.com/yumendy/NTES_MySQL_notes/blob/master/chapter4.md#42-mysql数据库设计)
+  * [4.3-MySQL容量评估](https://github.com/yumendy/NTES_MySQL_notes/blob/master/chapter4.md#43-mysql容量评估)
