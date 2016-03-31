@@ -510,3 +510,152 @@ order by a asc, b desc
 | CPU | 2c8core超线程 相当于32核 |
 | 网络吞吐量 | 万兆双网卡bunding |
 | 磁盘容量 | 600G |
+
+
+## 4.4-MySQL性能测试
+
+### 为什么需要性能测试
+
+* 对线上产品缺乏心理预估
+* 重现线上异常
+* 规划未来的业务增长
+* 测试不同硬件软件配置
+
+### 性能测试的分类
+
+* 设备层的测试
+* 业务层的测试
+* 数据库层的测试
+
+### 设备层的测试
+
+* 关注的指标
+  * 服务器、磁盘性能
+  * 磁盘坏块率
+  * 服务器寿命
+
+### 业务层测试
+
+* 针对业务进行测试
+
+### 数据库层测试
+
+* 什么情况下要做MySQL的测试
+  * 测试不同的MySQL分支版本
+  * 测试不同的MySQL版本
+  * 测试不同的MySQL参数搭配
+
+### MySQL测试分类
+
+* CPU Bound
+* IO Bound
+
+写入测试
+更新测试
+纯读测试
+混合模式
+
+### 常用的测试工具
+
+* 开源的MySQL性能测试工具
+  * sysbench
+  * tpcc-mysql
+  * mysqlslap
+* 针对业务编写性能测试工具
+  * blogbench
+
+### 性能测试衡量指标
+
+* 服务吞吐量(TPS, QPS)
+* 服务响应时间
+* 服务并发性
+
+### Sysbench
+
+* 业界较为出名的性能测试工具
+* 可以测试磁盘、CPU、数据库
+* 支持多种数据库：Oracle, DB2, MySQL
+* 需要自己下载编译安装
+* 建议版本：sysbench0.5
+
+### 编译安装Sysbench
+
+* 下载sysbench
+  * `git clone https://github.com/akopytov/sysbench.git`
+* 编译&安装
+  * `./autogen.sh`
+  * `./configure`
+  * `make && make install`
+
+### Sysbench流程
+
+* 常见的做法
+
+初始化数据 -> 运行测试 -> 清理数据
+
+### Prepare语法
+
+```bash
+sysbench --test=parallel_prepare.lua --oltp_tables_count=1 --rand-init=on --oltp-table-size=500000000 --mysql-host=127.0.0.1 --mysql-port=3306 --mysql-user=sys --mysql-password=netease --mysql-db=sbtest --max-requests=0 prepare
+```
+
+| 参数 | 含义 |
+| :------------- | :------------- |
+| --test=parallel_prepare.lua | 运行导数据的脚本 |
+| --oltp_tables_count | 测试需要几张表 |
+| --oltp-table-size | 每张表的大小 |
+| --mysql-host | MySQL Host |
+| --mysql-port | MySQL Port |
+| --mysql-db | MySQL DB |
+| --mysql-user | MySQL User |
+| --mysql-password | MySQL Password |
+| --rand-init | 是否随机初始化数据 |
+| --max-requests | 执行多少个请求之后停止 |
+| prepare | 执行导数据 |
+
+### Sysbench表结构
+
+```sql
+create table 'sbtest1'(
+  'id' int(10) unsigned not null AUTO_INCREMENT,
+  'k' int(10) unsigned not null DEFAULT '0',
+  'c' char(120) not null DEFAULT '',
+  'pad' char(60) not null DEFAULT '',
+  PRIMARY KEY ('id'),
+  KEY 'k_1' ('k')
+) ENGINE=InnoDB AUTO_INCREMENT=3000000001 DEFAULT CHARSET=utf8 MAX_ROWS=1000000
+```
+
+### Run语法
+
+```bash
+sysbench --test=oltp.lua --oltp_tables_count=1 --num-threads=100 --oltp-table-size=500000000 --oltp-read-only=off --report-interval=10 --rand-type=uniform --mysql-host=127.0.0.1 --mysql-port=3306 --mysql-user=sys --mysql-password=netease --mysql-db=sbtest --max-time=1000 --max-requests=0 run
+```
+
+| 参数 | 含义 |
+| :------------- | :------------- |
+| --test=oltp.lua | 需要运行的lua脚本 |
+| --oltp_tables_count | 测试需要几张表 |
+| --oltp-table-size | 每张表的大小 |
+| --num-threads | 测试并发线程数 |
+| --oltp-read-only | 是否为只读测试 |
+| --report-interval | 结果输出间隔 |
+| --rand-type | 数据分布模式，热点数据或者随机数据 |
+| --max-time | 最大运行时间 |
+| --max-requests | 执行多少个请求之后停止 |
+| prepare | 开始测试 |
+
+### 特殊情况
+
+* 写入测试
+
+写入数据进行测试 -> 清理数据
+
+### cleanup
+
+* 手动drop掉表和database
+* 使用sysbench提供的cleanup命令
+
+```bash
+sysbench --test=parallel_prepare.lua --oltp_tables_count=1 --rand-init=on --oltp-table-size=500000000 --mysql-host=127.0.0.1 --mysql-port=3306 --mysql-user=sys --mysql-password=netease --mysql-db=sbtest --max-requests=0 cleanup
+```
