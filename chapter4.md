@@ -659,3 +659,55 @@ sysbench --test=oltp.lua --oltp_tables_count=1 --num-threads=100 --oltp-table-si
 ```bash
 sysbench --test=parallel_prepare.lua --oltp_tables_count=1 --rand-init=on --oltp-table-size=500000000 --mysql-host=127.0.0.1 --mysql-port=3306 --mysql-user=sys --mysql-password=netease --mysql-db=sbtest --max-requests=0 cleanup
 ```
+
+### Tpcc-mysql
+
+* TPC-C是专门针对联机交易处理系统(OLTP系统)的规范
+* Tpcc-mysql由percona根据规范实现
+
+* 下载Tpcc-mysql
+  * `bzr branch lp:~percona-dev/perconatools/tpcc-mysql`
+* 编译安装
+
+### 使用Tpcc-mysql的步骤
+
+创建表结构和索引 -> 导数据 -> 运行测试 -> 数据清理
+
+### 创建表结构
+
+* create_table.sql
+* add_fkey_idx.sql
+
+### Tpcc-load
+
+`tpcc_load [server] [DB] [user] [pass] [warehouse]`
+
+| 函数 | 含义 |
+| :------------- | :------------- |
+| server | 数据库IP |
+| DB | DB名称 |
+| user | 用户名 |
+| pass | 密码 |
+| warehouse | 仓库数量 |
+
+### Tpcc-start
+
+```bash
+tpcc_start -h server_host -P port -d database_name -u mysql_user -p mysql_password -w warehouse -c connections -r warmup_time -I running_time -i report-interval -f report-file
+```
+
+| 函数 | 含义 |
+| :------------- | :------------- |
+| warehouse | 仓库数量 |
+| connections | 并发线程数 |
+| warmup_time | 预热时间 |
+| running_time | 运行时间 |
+| report_interval | 输出时间间隔 |
+| report_file | 输出文件 |
+
+### 总结
+
+* IO Bound测试数据量要远大于内存、CPU Bound测试数据量要小于内存
+* 测试时间建议大于60分钟，减小误差
+* Sysbench更倾向于测试MySQL性能、TPCC更接近于业务
+* 运行测试程序需要同时监控机器负载，MySQL各项监控指标
