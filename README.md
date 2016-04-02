@@ -32,3 +32,5 @@
   * [4.2-MySQL数据库设计](https://github.com/yumendy/NTES_MySQL_notes/blob/master/chapter4.md#42-mysql数据库设计)
   * [4.3-MySQL容量评估](https://github.com/yumendy/NTES_MySQL_notes/blob/master/chapter4.md#43-mysql容量评估)
   * [4.4-MySQL性能测试](https://github.com/yumendy/NTES_MySQL_notes/blob/master/chapter4.md#44-MySQL性能测试)
+* [MySQL运维实践](https://github.com/yumendy/NTES_MySQL_notes/blob/master/chapter5.md#MySQL运维实践)
+  * [5.1-MySQL日志系统](https://github.com/yumendy/NTES_MySQL_notes/blob/master/chapter5.md#51-MySQL日志系统)
