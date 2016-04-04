@@ -327,3 +327,90 @@ innobackupex --user=root --password=123456 --defaults-file=/etc/mysql/my.cnf --c
 * 数据量大小 -> 逻辑备份or物理备份，全量or增量
 * 数据库本地磁盘空间十分充足 -> 备份到本地or远程
 * 需要多块恢复 -> 备份频率 小时or天
+
+
+## 5.3-MySQL数据恢复
+
+### 什么时候需要恢复数据
+
+* 硬件故障(如磁盘损坏)
+* 人为删除(如误删除数据、被黑)
+* 业务回滚(如游戏bug需要回档)
+* 正常需求(如部署镜像库、查看历史某时刻数据)
+
+### 数据恢复的必要条件
+
+* 有效备份
+* 完整的数据库操作日志(binlog)
+
+### 数据恢复思路
+
+* 最新一次备份 + binlog恢复到故障时间点(适用于各种数据丢失场景)
+* 挖掘最后一次备份到故障点之间的binlog获取相关SQL语句，构造反转SQL语句并应用到数据库(只是用于记录丢失，且binlog必须是row格式)
+
+### 反转SQL语句
+
+例：
+
+`t1(id primary key, a int)`
+
+反转SQL语句：
+
+`insert into t(id, a) values(1, 1)` -> `delete t1 where id=1 and a=1`
+`update t1 set a=5 where id=1` -> `update t1 set a=1 where id=1`
+`delete from t1 where id=1` -> `insert into t(id, a) values(1, 1)`
+
+### 数据库恢复工具与命令
+
+* mysqldump备份 -> source恢复
+* xtrabackup备份 -> xtrabackup恢复
+* binlog备份 -> mysqlbinlog恢复
+
+### 详细示例讲解
+
+* 恢复某几条误删数据
+* 恢复误删表、库
+* 将数据库恢复到指定时间点
+
+### 恢复误删除数据
+
+case：误操作，删除数据忘记带完整条件，执行`delete from user where age > 30 [and sex=male]`
+
+需求：将被删除的数据还原
+
+恢复前提：完整的数据库操作日志(binlog)
+
+```sql
+delete from user where sex='female';
+```
+
+```bash
+# 首先需要找到binlog里的信息
+mysqlbinlog -vv mysql-bin.000001
+# 找出sql语句，然后写出反转sql语句
+```
+
+### 恢复误删表、库
+
+case：业务被黑，表被删除了(drop teble user)
+
+需求：将表恢复
+
+前提：备份 + 备份以来完整binlog
+
+```bash
+innobackupex --apply-log /dbbackup/filename
+# 查看binlog的位置点
+cat xtrabackup_binlog_info
+# 查看结束点
+mysqlbinlog -vv filename
+
+mysqlbinlog -vv --start-position=2556990 -- stop-position=2776338
+mysqlbinlog -vv --start-position=2556990 -- stop-position=2776338 | mysql -uroot -p123456 --sock=/dbbackup/mysql_3309/mysqld.sock
+```
+
+### 课程小结
+
+* 恢复是已经非常苦逼的差事，尽量避免做。我们要做数据卫士而不是救火队员。(线上应该严格把控权限，数据变更操作应事先测试，操作时做好备份)
+* 有效备份(+binlog)是重中之重，对数据库定期备份是必须的
+* 备份是一切数据恢复的基础
