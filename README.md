@@ -36,3 +36,4 @@
   * [5.1-MySQL日志系统](https://github.com/yumendy/NTES_MySQL_notes/blob/master/chapter5.md#51-mysql日志系统)
   * [5.2-MySQL数据备份](https://github.com/yumendy/NTES_MySQL_notes/blob/master/chapter5.md#52-mysql数据备份)
   * [5.3-MySQL数据恢复](https://github.com/yumendy/NTES_MySQL_notes/blob/master/chapter5.md#52-mysql数据恢复)
+  * [5.4-MySQL线上部署](https://github.com/yumendy/NTES_MySQL_notes/blob/master/chapter5.md#54-MySQL线上部署)
