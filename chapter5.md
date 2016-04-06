@@ -471,3 +471,130 @@ mysqlbinlog -vv --start-position=2556990 -- stop-position=2776338 | mysql -uroot
 * 根据需求选择合适的版本以及分支，建议使用或升级到较高版本5.5或5.6
 * 如果需要定制MySQL功能的话，可以考虑编译安装，否则的话建议使用二进制包安装，比较省事
 * 根据机器配置选择部署多个MySQL实例还是单个实例，机器配置非常好的话，建议部署多实例
+
+
+## 5.5-MySQL主从复制
+
+### MySQL主从复制
+
+* 一主一从
+* 主主复制
+* 一主多从
+* 多主一从
+* 联级复制
+
+### MySQL主从复制用途
+
+* 实时灾备，用于故障切换
+* 读写分离，提供查询服务
+* 备份，避免影响业务
+
+### MySQL主从复制部署
+
+主从部署必要条件
+
+* 主库开启binlog日志(设置log-bin参数)
+* 主从server-id不同
+* 从库服务器能连通主库
+
+主从部署步骤：
+
+* 备份还原(mysqldump或xtrabackup)
+* 授权(grant replication slave on *.*)
+* 配置复制，并启动(change master to)
+* 查看主从复制信息(show slave status\G)
+
+### MySQL复制存在的问题
+
+存在的问题
+
+* 主机宕机后，数据可能丢失
+* 从库只有一个sql thread，主库写压力大，复制很可能延时
+
+解决方法：
+
+* 半同步复制
+* 并行复制
+
+### MySQL semi-sync(半同步复制)
+
+半同步复制
+
+* 5.5集成到MySQL，以插件形式存在，需要单独安装
+* 确保事务提交后binlog至少传输到一个从库
+* 不保证从库应用完这个事务的binlog
+* 性能有一定的降低，响应时间更长
+* 网络异常或从库宕机，卡住主库，直到超时或从库恢复
+
+### MySQL异步复制
+
+![异步复制](./sorence/images/04.png)
+
+### MySQL semi-sync(半同步复制)
+
+![半同步复制](./sorence/images/05.png)
+
+### 配置MySQL半同步复制
+
+只需一次：
+
+主库：
+
+`INSTALL PLUGIN rpl_semi_sync_master SONAME 'semisync_master.so';`
+
+从库：
+
+`INSTALL PLUGIN rpl_semi_sync_slave SONAME 'semisync_slave.so';`
+
+动态设置：
+
+主库：
+
+`SET GLOBAL rpl_semi_sync_master_enabled=1;`
+`SET GLOBAL rpl_semi_sync_master_timeout=N;` master 延迟切异步
+
+从库：
+
+`SET GLOBAL rpl_semi_sync_slave_enabled=1;`
+
+### 配置MySQL并行复制
+
+并行复制
+
+* 社区版5.6中新增
+* 并行是指从库多线程apply binlog
+* 库级别并行应用binlog，同一个数据库更改还是串行的(5.7版并行复制基于事务组)
+
+设置
+
+`set global slave_parallel_workers=10;` 设置sql线程数为10
+
+### 联级复制
+
+A -> B -> C
+
+B中添加参数：
+log_slave_updates
+B将把A的binlog记录到自己的binlog日志中
+
+### 复制监控
+
+查询从库状态：
+
+`show slave status\G`
+
+### 复制出错处理
+
+常见：1062(主键冲突) 1032(记录不存在)
+解决：手动处理
+或：
+跳过复制出错
+`set global sql_slave_skip_counter=1`
+
+### 总结
+
+* MySQL主从复制是MySQL高可用性、高性能(负载均衡)的基础
+* 简单、灵活，部署方式多样，可以根据不同业务场景部署不同复制结构
+* MySQL主从复制目前也存在一些问题，可以根据需要部署复制增强功能来解决问题
+* 复制过程中应该时刻监控复制状态，复制出错或延时可能给系统造成影响
+* MySQL复制是MySQL数据库工程师必知必会的一项基本技能
