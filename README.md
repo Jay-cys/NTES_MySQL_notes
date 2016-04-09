@@ -38,3 +38,5 @@
   * [5.3-MySQL数据恢复](https://github.com/yumendy/NTES_MySQL_notes/blob/master/chapter5.md#52-mysql数据恢复)
   * [5.4-MySQL线上部署](https://github.com/yumendy/NTES_MySQL_notes/blob/master/chapter5.md#54-MySQL线上部署)
   * [5.5-MySQL主从复制](https://github.com/yumendy/NTES_MySQL_notes/blob/master/chapter5.md#55-MySQL主从复制)
+  * [5.6-MySQL日常运维](https://github.com/yumendy/NTES_MySQL_notes/blob/master/chapter5.md#56-mysql日常运维)
+  
