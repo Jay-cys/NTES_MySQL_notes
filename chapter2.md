@@ -497,6 +497,117 @@ DROP USER user [, user] ...
 * 线上数据库不要留test库
 
 
+## 实践课：数据库对象
+
+### 何为表结构设计
+
+* 表结构设计需要在正式进行开发之前完成
+* 根据产品需求将复杂的业务模型抽象出来
+
+### 设计表的时候需要注意哪些
+
+* 理解各个表的依赖关系
+* 理解各个表的功能特点
+  * 字段之间的约束、索引
+  * 字段类型、字段长度
+
+### 收集表属性
+
+* 昵称
+* 生日
+* 性别
+* 手机号码
+* 住宅号码
+* 邮编
+* 住宅地址
+* 注册地址
+* 登录IP
+* 上一次登录时间
+* 邮件地址
+
+### 理解表的功能特点——数据用途
+
+```sql
+create table tb_account(
+  account_id int not null auto_increment primary key,
+  nick_name varchar(20),
+  true_name varchar(20),
+  sex char(1),
+  mail_address varchar(50),
+  phone1 varchar(20) not null,
+  phone2 varchar(20),
+  password varchar(30) not null,
+  create_time datetime,
+  account_state tinyint,
+  last_login_time datetime,
+  last_login_ip varchar(20)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+
+create table tb_goods(
+  good_id bigint not null auto_increment primary key,
+  goods_name varchar(100) not null,
+  pic_url varchar(500) not null,
+  store_quantity int not null,
+  goods_note varchar(4096),
+  producer varchar(500),
+  category_id int not null
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+
+create table tb_goods_category(
+  category_id int not null auto_increment primary key,
+  category_level smallint not null,
+  category_name varchar(500),
+  upper_category_id int not null
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+
+create table tb_order(
+  order_id bigint not null auto_increment primary key,
+  account_id int not null,
+  create_time datetime,
+  order_amount decimal(12,2),
+  order_state tinyint,
+  update_time datetime,
+  order_ip varchar(20),
+  pay_method varchar(20),
+  user_notes varchar(500)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+
+create table tb_order_item(
+  order_item_id bigint not null auto_increment primary key,
+  order_id bigint not null,
+  goods_id bigint not null,
+  goods_quantity int not null,
+  goods_amount decimal(12,2),
+  uique key uk_order_goods(order_id, goods_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+```
+
+### 数据类型——命名规范
+
+* 所有表名，字段名全部使用小写字母
+* 不同业务，表名使用不同前缀区分。
+* 生成环境表名字段名要有实际意义
+* 单个字段尽量使用字段全名；多个字段之间用下划线分隔
+
+### 字段设计规范
+
+* 字段类型选择，尽量选择能满足应用要求的最小数据类型
+* 尽量使用整形代替字符型。整形在字段长度、索引大小等方面开销小效率更高，如邮编字段，手机号码等
+* 注释，每个字段必须以comment语句给出字段的作用
+* 经常访问的大字段需要单独放到一张表中，避免降低sql效率，图片、电影等大文件数据禁止存数据库
+* 新业务统一建议使用utf8mb4字符集
+
+### 用户赋权
+
+* 理解用户到底需要什么权限
+  * 普通用户只有数据读写权限
+  * 系统管理员具有super权限
+* 权限粒度要做到尽可能的细
+  * 普通用户不要设置with grant option属性
+  * 权限粒度：系统层面>库层面>表层面>字段层面
+* 禁止简单密码
+  * 线上密码要求随机
+
 ## 2.4-SQL语言进阶
 
 本课程涉及建表SQL
