@@ -468,6 +468,7 @@ DROP USER user [, user] ...
 * db
 * table_pirv
 * columns_pirv
+* host
 
 ### 权限验证流程
 
