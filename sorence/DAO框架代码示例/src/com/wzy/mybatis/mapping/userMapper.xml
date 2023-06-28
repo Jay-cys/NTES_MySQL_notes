@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wzy.mybatis.mapping.userMapper">
+
+    <select id="getUser" parameterType="int"  
+	resultType="com.wzy.mybatis.model.User">
+        select * from user where id=#{id}
+    </select>
+	
+	 <resultMap id="UserMap"  type="com.wzy.mybatis.model.User">
+        <id column="id" property="id" />
+        <result column="name" property="name" />
+        <result column="age" property="age" />
+    </resultMap>
+	
+	<select id="getUserList"  resultMap="UserMap">
+        select * from user 
+    </select>
+	
+	<insert id="addUser" parameterType="com.wzy.mybatis.model.User" 
+            useGeneratedKeys="true" keyProperty="id"> 
+            insert into user(name,age) values(#{name},#{age})  
+    </insert>
+    
+    <update id="updateUser" parameterType="com.wzy.mybatis.model.User" >
+        update user set name=#{name},age=#{age} where id=#{id}
+    </update>
+    
+    <delete id="deleteUser" parameterType="int">
+        delete from user where id=#{id}
+    </delete>
+    
+    
+    <!-- 多对一连表，Blog对象（包含User） --> 
+    <resultMap id="BlogMap" type="com.wzy.mybatis.model.Blog">
+        <id property="id" column="blogid" />
+        <result property="title" column="title" />
+        <result property="content" column="content" />        
+        <association property="user" javaType="com.wzy.mybatis.model.User" 
+        resultMap="UserMap" />            
+    </resultMap>
+    
+    <select id="getBlogListByUid" parameterType="int" resultMap="BlogMap">
+       select user.id,user.name,user.age,blog.id blogid,blog.title,blog.content from user,blog
+              where user.id=blog.userid and user.id=#{id}
+    </select>
+    
+</mapper>
+
+
+
